@@ -129,6 +129,11 @@ export function AgentChat({
             <div>
               <p className="font-medium">Request failed</p>
               <p className="mt-0.5 text-muted-foreground">{errorMessage}</p>
+              {errorMessage.includes("credentials") ? (
+                <p className="mt-1 text-muted-foreground text-xs">
+                  Set AI_GATEWAY_API_KEY in .env.local, or run eve link.
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
@@ -160,29 +165,30 @@ export function AgentChat({
         className={cn(
           "mx-auto w-full px-4 sm:px-6",
           isEmpty
-            ? "flex max-w-xl flex-1 flex-col items-center justify-center gap-8 pb-[10vh]"
+            ? cn(
+                "flex max-w-xl flex-1 flex-col items-center",
+                isPanel ? "justify-end gap-4 pb-4" : "justify-center gap-8 pb-[10vh]",
+              )
             : "max-w-3xl shrink-0 pb-6",
         )}
       >
         {isEmpty ? (
-          <div className={cn("flex flex-col items-center gap-3 text-center", isPanel && "gap-2")}>
-            <h1
-              className={cn(
-                "font-medium tracking-tighter",
-                isPanel ? "text-2xl" : "text-5xl",
-              )}
-            >
-              {AGENT_NAME}
-            </h1>
+          <div className={cn("flex w-full flex-col items-center gap-3 text-center", isPanel && "gap-2")}>
+            {isPanel ? null : (
+              <h1 className="font-medium text-5xl tracking-tighter">{AGENT_NAME}</h1>
+            )}
             {isPanel ? (
               <p className="max-w-sm text-muted-foreground text-sm">
                 Ask for a tour, or tell me which planet to show.
               </p>
             ) : null}
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className={cn("flex w-full gap-2", isPanel ? "flex-col" : "flex-wrap justify-center")}>
               {STARTERS.map((starter) => (
                 <button
-                  className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs transition-colors hover:bg-white/10 disabled:opacity-50"
+                  className={cn(
+                    "rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-left text-slate-100 text-xs transition-colors hover:bg-white/20 disabled:opacity-50",
+                    isPanel && "w-full",
+                  )}
                   disabled={isBusy}
                   key={starter}
                   onClick={() => {
