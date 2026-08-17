@@ -1,14 +1,44 @@
-# 3D Solar System
+# 3D Solar System Guide
 
-An interactive 3D model of the solar system built using Three.js and deployable via GitHub Pages.
+An interactive Three.js solar system with an [eve](https://eve.dev) agent that can explain the planets, move the camera, and change orbit speed.
 
-## How to Run
+## Run locally
 
-1. Open `index.html` in your browser.
+Node.js 24 is required.
 
-## GitHub Pages
+```bash
+npm install
+```
 
-- Push the project to a GitHub repo.
-- Enable GitHub Pages under settings using the root directory or `/docs`.
+Set a Vercel AI Gateway key (or link a Vercel project so `VERCEL_OIDC_TOKEN` is available):
 
-Your solar system will be live at: `https://yourusername.github.io/repo-name`
+```bash
+cp .env.example .env.local
+```
+
+Then start the Next.js app, which also boots the eve agent:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). The 3D model fills the page; the guide chat sits beside it.
+
+The eve REPL is optional:
+
+```bash
+npm run dev:eve
+```
+
+## What the agent can do
+
+- Answer questions about the Sun and eight planets
+- Focus the camera on a named body
+- Speed up, slow down, or pause orbits
+- Lead a short outward tour from the Sun
+
+Click a planet to inspect it yourself, or ask the guide to show it.
+
+## Deploy
+
+Deploy the Next.js app to Vercel. `withEve()` mounts the agent at `/eve/v1/*` on the same origin. Production browser chat is open for this public demo (`none()` in `agent/channels/eve.ts`).
