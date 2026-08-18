@@ -125,16 +125,29 @@ export function AgentChat({
 
       {errorMessage ? (
         <div className="mx-auto w-full max-w-3xl shrink-0 px-4 pt-2 sm:px-6">
-          <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm">
-            <AlertCircleIcon className="mt-0.5 size-4 shrink-0 text-destructive" />
+          <div
+            className={cn(
+              "flex items-start gap-3 rounded-lg border px-3 py-2.5 text-sm",
+              errorMessage.includes("credentials")
+                ? "border-white/10 bg-white/5"
+                : "border-destructive/30 bg-destructive/5",
+            )}
+          >
+            <AlertCircleIcon
+              className={cn(
+                "mt-0.5 size-4 shrink-0",
+                errorMessage.includes("credentials") ? "text-amber-200" : "text-destructive",
+              )}
+            />
             <div>
-              <p className="font-medium">Request failed</p>
-              <p className="mt-0.5 text-muted-foreground">{errorMessage}</p>
-              {errorMessage.includes("credentials") ? (
-                <p className="mt-1 text-muted-foreground text-xs">
-                  Set AI_GATEWAY_API_KEY in .env.local, or run eve link.
-                </p>
-              ) : null}
+              <p className="font-medium">
+                {errorMessage.includes("credentials") ? "Guide is offline" : "Request failed"}
+              </p>
+              <p className="mt-0.5 text-muted-foreground">
+                {errorMessage.includes("credentials")
+                  ? "The 3D observatory and catalog still work. Add AI_GATEWAY_API_KEY to talk to the guide."
+                  : errorMessage}
+              </p>
             </div>
           </div>
         </div>

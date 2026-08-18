@@ -2,7 +2,14 @@
 
 import { ExternalLinkIcon } from "lucide-react";
 import { moonsOf, type CatalogBody } from "@/lib/catalog";
-import { formatKm, formatMass, formatNumber, formatTemperature, shortSummary } from "@/lib/format";
+import {
+  formatDayLength,
+  formatKm,
+  formatMass,
+  formatNumber,
+  formatTemperature,
+  shortSummary,
+} from "@/lib/format";
 
 export function BodyInspector({
   body,
@@ -32,7 +39,7 @@ export function BodyInspector({
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <Stat label="Diameter" value={formatKm(body.diameter)} />
           <Stat label="Mass" value={formatMass(body.mass)} />
-          <Stat label="Day" value={body.dayLength} />
+          <Stat label="Day" value={formatDayLength(body.lengthOfDay ?? body.rotationPeriod)} />
           <Stat label="Year" value={body.yearLength} />
           <Stat label="Mean temp" value={formatTemperature(body.meanTemperature)} />
           <Stat

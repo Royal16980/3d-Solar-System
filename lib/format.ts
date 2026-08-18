@@ -25,15 +25,25 @@ export function formatTemperature(celsius: number | null | undefined): string {
   return `${formatNumber(celsius, 0)}°C / ${formatNumber(fahrenheit, 0)}°F`;
 }
 
-export function formatMass(earthMasses: number | null | undefined): string {
-  if (earthMasses == null) return "—";
-  if (earthMasses >= 1000) {
-    return `${formatNumber(earthMasses / 332_946, 3)} solar masses`;
+const EARTH_MASS_E24_KG = 5.972;
+const SUN_MASS_E24_KG = 1_988_500;
+
+export function formatMass(massE24Kg: number | null | undefined): string {
+  if (massE24Kg == null) return "—";
+  if (massE24Kg >= SUN_MASS_E24_KG * 0.05) {
+    return `${formatNumber(massE24Kg / SUN_MASS_E24_KG, 3)} solar masses`;
   }
-  if (earthMasses >= 1) {
-    return `${formatNumber(earthMasses, 2)} Earth masses`;
+  const earths = massE24Kg / EARTH_MASS_E24_KG;
+  return `${formatNumber(earths, earths >= 0.1 ? 2 : 4)} Earth masses`;
+}
+
+export function formatDayLength(hours: number | null | undefined): string {
+  if (hours == null) return "—";
+  const value = Math.abs(hours);
+  if (value >= 48) {
+    return `${formatNumber(value / 24, 1)} Earth days`;
   }
-  return `${formatNumber(earthMasses, 4)} Earth masses`;
+  return `${formatNumber(value, value >= 10 ? 1 : 2)} hours`;
 }
 
 export function shortSummary(text: string, max = 220): string {

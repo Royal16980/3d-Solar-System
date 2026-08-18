@@ -7,6 +7,7 @@ import { getBody, resolveBody, requireBody, type CatalogBody } from "@/lib/catal
 import type { SceneCommand } from "@/lib/scene-commands";
 import { AgentChat } from "./agent-chat";
 import { BodyInspector } from "./hud/body-inspector";
+import { GuideBriefing } from "./hud/guide-briefing";
 import { PlanetRail } from "./hud/planet-rail";
 import { SearchCommand } from "./hud/search-command";
 import { TimeControls } from "./hud/time-controls";
@@ -127,6 +128,9 @@ export function ExplorerApp({ initialBodyId = "earth" }: { readonly initialBodyI
           <div className="flex items-center gap-2 border-white/10 border-b px-4 py-3 text-amber-100 text-xs uppercase tracking-[0.18em]">
             <SparklesIcon className="size-3.5" />
             Observatory guide
+          </div>
+          <div className="px-4 pt-3">
+            <GuideBriefing body={selected} />
           </div>
           <AgentChat
             clientContext={clientContext}
