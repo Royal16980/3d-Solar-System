@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "next build",
+    "export:pages": "node scripts/export-pages.mjs",
     "dev": "next dev",
     "start": "next start",
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -30,6 +31,7 @@
     "@vercel/connect": "0.4.3",
     "ai": "^7.0.58",
     "class-variance-authority": "0.7.1",
+    "client-only": "^0.0.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "eve": "^0.39.0",
