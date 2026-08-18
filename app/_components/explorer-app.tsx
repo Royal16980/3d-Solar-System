@@ -2,7 +2,7 @@
 
 import { MessageCircleIcon, SparklesIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getBody, resolveBody, requireBody, type CatalogBody } from "@/lib/catalog";
 import type { SceneCommand } from "@/lib/scene-commands";
 import { AgentChat } from "./agent-chat";
@@ -27,6 +27,17 @@ export function ExplorerApp({ initialBodyId = "earth" }: { readonly initialBodyI
   const [showDwarfs, setShowDwarfs] = useState(
     () => getBody(initialBodyId)?.kind === "dwarf-planet",
   );
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requested = params.get("body");
+    if (requested && getBody(requested)) {
+      setSelectedId(requested);
+      if (getBody(requested)?.kind === "dwarf-planet") {
+        setShowDwarfs(true);
+      }
+    }
+  }, []);
   const [guideOpen, setGuideOpen] = useState(true);
 
   const selected = getBody(selectedId) ?? requireBody("earth");
