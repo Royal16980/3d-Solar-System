@@ -11,7 +11,7 @@
     "dev": "next dev",
     "start": "next start",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build:eve": "eve build",
+    "build:eve": "eve build --skip-sandbox-prewarm",
     "dev:eve": "eve dev",
     "start:eve": "eve start"
   },
@@ -33,6 +33,7 @@
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "eve": "^0.39.0",
+    "just-bash": "^3.1.0",
     "lucide-react": "1.16.0",
     "motion": "12.40.0",
     "nanoid": "5.1.11",
