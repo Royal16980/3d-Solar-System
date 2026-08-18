@@ -32,6 +32,7 @@ type AgentStatus = ReturnType<typeof useEveAgent>["status"];
 export type AgentClientContext = {
   readonly focusedBody: string;
   readonly orbitSpeed: number;
+  readonly showDwarfs?: boolean;
 };
 
 export function AgentChat({
@@ -113,7 +114,7 @@ export function AgentChat({
         isPanel ? "h-full bg-transparent" : "h-dvh",
       )}
     >
-      {isEmpty && !isPanel ? null : (
+      {isPanel || isEmpty ? null : (
         <header className="flex h-14 shrink-0 items-center justify-center gap-3 pl-4 pr-2">
           <span className="flex min-w-0 items-center gap-2">
             <span className="truncate text-muted-foreground text-sm">{AGENT_NAME}</span>

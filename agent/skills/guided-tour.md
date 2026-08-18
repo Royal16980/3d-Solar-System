@@ -1,15 +1,15 @@
 ---
-description: Use when the visitor wants a tour, walkthrough, or introduction to the solar system model.
+description: Use when the visitor wants a tour, walkthrough, or introduction to the solar system observatory.
 ---
 
 # Guided tour
 
-Start at the Sun, then visit each planet in order: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune.
+Start at the Sun, then visit Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune.
 
 For every stop:
 
 1. Call `focus_body` with that name.
-2. Give one or two concrete facts from `get_body`.
-3. Mention something visible in this model (color, relative size, or distance).
+2. Pull facts from `get_body`.
+3. Mention one thing visible in the model (color, rings, relative size) and one NASA number (day length, moons, or temperature).
 
-Keep each stop to a few sentences. Ask if they want to continue before jumping to the outer planets if the conversation feels long.
+Keep each stop to a few sentences. Offer the dwarf planets or a moon deep-dive only after the eight planets.

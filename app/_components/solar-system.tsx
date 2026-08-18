@@ -13,37 +13,46 @@ import {
   Vector3 as ThreeVector3,
 } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { BODIES, type CelestialBody } from "@/lib/solar-system";
+import { sceneBodies, type CatalogBody } from "@/lib/catalog";
 
-const DEFAULT_CAMERA: [number, number, number] = [0, 30, 50];
+const DEFAULT_CAMERA: [number, number, number] = [0, 28, 52];
 
 type SolarSystemProps = {
   readonly focusedBodyId: string;
   readonly orbitSpeed: number;
+  readonly showDwarfs: boolean;
   readonly onSelectBody: (id: string) => void;
 };
 
-export function SolarSystem({ focusedBodyId, orbitSpeed, onSelectBody }: SolarSystemProps) {
+export function SolarSystem({
+  focusedBodyId,
+  orbitSpeed,
+  showDwarfs,
+  onSelectBody,
+}: SolarSystemProps) {
   return (
     <Canvas
-      camera={{ fov: 75, near: 0.1, position: DEFAULT_CAMERA }}
+      camera={{ fov: 55, near: 0.1, far: 400, position: DEFAULT_CAMERA }}
       className="h-full w-full"
-      dpr={[1, 2]}
+      dpr={[1, 1.75]}
       gl={{ antialias: true }}
     >
-      <color args={["#030712"]} attach="background" />
-      <ambientLight intensity={0.18} />
-      <Stars depth={80} factor={3} fade radius={180} saturation={0} speed={0.2} />
+      <color args={["#05060c"]} attach="background" />
+      <fog attach="fog" args={["#05060c", 80, 220]} />
+      <ambientLight intensity={0.12} />
+      <Stars depth={90} factor={2.6} fade radius={220} saturation={0} speed={0.15} />
       <System
         focusedBodyId={focusedBodyId}
         onSelectBody={onSelectBody}
         orbitSpeed={orbitSpeed}
+        showDwarfs={showDwarfs}
       />
     </Canvas>
   );
 }
 
-function System({ focusedBodyId, orbitSpeed, onSelectBody }: SolarSystemProps) {
+function System({ focusedBodyId, orbitSpeed, showDwarfs, onSelectBody }: SolarSystemProps) {
+  const bodies = sceneBodies(showDwarfs);
   const positions = useRef<Record<string, Vector3>>({});
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const focusTarget = useRef(new ThreeVector3());
@@ -51,16 +60,14 @@ function System({ focusedBodyId, orbitSpeed, onSelectBody }: SolarSystemProps) {
 
   useFrame((state, delta) => {
     const current = positions.current[focusedBodyId] ?? positions.current.sun;
-    if (!current) {
-      return;
-    }
+    if (!current) return;
 
-    const body = BODIES.find((item) => item.id === focusedBodyId);
-    const offset = Math.max(8, (body?.size ?? 1) * 6);
+    const body = bodies.find((item) => item.id === focusedBodyId);
+    const offset = Math.max(7, (body?.size ?? 1) * 5.4);
     focusTarget.current.copy(current);
-    cameraGoal.current.set(current.x + offset, current.y + offset * 0.7, current.z + offset);
+    cameraGoal.current.set(current.x + offset, current.y + offset * 0.55, current.z + offset);
 
-    const alpha = 1 - Math.exp(-2.2 * delta);
+    const alpha = 1 - Math.exp(-2.4 * delta);
     state.camera.position.lerp(cameraGoal.current, alpha);
     controlsRef.current?.target.lerp(focusTarget.current, alpha);
     controlsRef.current?.update();
@@ -71,11 +78,11 @@ function System({ focusedBodyId, orbitSpeed, onSelectBody }: SolarSystemProps) {
       <OrbitControls
         enableDamping
         enablePan={false}
-        maxDistance={120}
-        minDistance={8}
+        maxDistance={160}
+        minDistance={7}
         ref={controlsRef}
       />
-      {BODIES.map((body) =>
+      {bodies.map((body) =>
         body.kind === "star" ? (
           <Sun
             body={body}
@@ -85,7 +92,7 @@ function System({ focusedBodyId, orbitSpeed, onSelectBody }: SolarSystemProps) {
             selected={focusedBodyId === body.id}
           />
         ) : (
-          <Planet
+          <OrbitingBody
             body={body}
             key={body.id}
             onSelect={onSelectBody}
@@ -105,7 +112,7 @@ function Sun({
   positions,
   selected,
 }: {
-  readonly body: CelestialBody;
+  readonly body: CatalogBody;
   readonly onSelect: (id: string) => void;
   readonly positions: Record<string, Vector3>;
   readonly selected: boolean;
@@ -120,38 +127,47 @@ function Sun({
 
   return (
     <group>
-      <pointLight color="#fff4cc" decay={0.4} distance={300} intensity={4} />
+      <pointLight color="#fff1c2" decay={0.35} distance={280} intensity={5.2} />
+      <mesh ref={meshRef}>
+        <sphereGeometry args={[body.size * 1.35, 32, 32]} />
+        <meshBasicMaterial color={body.glow} opacity={0.16} transparent />
+      </mesh>
       <mesh
         onClick={(event) => {
           event.stopPropagation();
           onSelect(body.id);
         }}
-        ref={meshRef}
+        onPointerOver={() => {
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          document.body.style.cursor = "auto";
+        }}
       >
-        <sphereGeometry args={[body.size, 48, 48]} />
+        <sphereGeometry args={[body.size, 64, 64]} />
         <meshBasicMaterial color={body.color} />
       </mesh>
-      {selected ? <SelectionRing radius={body.size + 0.45} /> : null}
+      {selected ? <SelectionRing radius={body.size + 0.5} /> : null}
       <BodyLabel body={body} selected={selected} />
     </group>
   );
 }
 
-function Planet({
+function OrbitingBody({
   body,
   onSelect,
   orbitSpeed,
   positions,
   selected,
 }: {
-  readonly body: CelestialBody;
+  readonly body: CatalogBody;
   readonly onSelect: (id: string) => void;
   readonly orbitSpeed: number;
   readonly positions: Record<string, Vector3>;
   readonly selected: boolean;
 }) {
   const groupRef = useRef<Group>(null);
-  const angle = useRef(Math.random() * Math.PI * 2);
+  const angle = useRef(hashAngle(body.id));
   const color = useMemo(() => new Color(body.color), [body.color]);
 
   useFrame((_, delta) => {
@@ -167,8 +183,13 @@ function Planet({
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[body.distance - 0.02, body.distance + 0.02, 128]} />
-        <meshBasicMaterial color="#94a3b8" opacity={0.18} side={DoubleSide} transparent />
+        <ringGeometry args={[body.distance - 0.015, body.distance + 0.015, 160]} />
+        <meshBasicMaterial
+          color={selected ? "#e2e8f0" : "#64748b"}
+          opacity={selected ? 0.35 : body.kind === "dwarf-planet" ? 0.1 : 0.16}
+          side={DoubleSide}
+          transparent
+        />
       </mesh>
       <group ref={groupRef}>
         <mesh
@@ -176,11 +197,29 @@ function Planet({
             event.stopPropagation();
             onSelect(body.id);
           }}
+          onPointerOver={() => {
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={() => {
+            document.body.style.cursor = "auto";
+          }}
         >
-          <sphereGeometry args={[body.size, 32, 32]} />
-          <meshStandardMaterial color={color} metalness={0.05} roughness={0.45} />
+          <sphereGeometry args={[body.size, 48, 48]} />
+          <meshStandardMaterial
+            color={color}
+            emissive={body.glow}
+            emissiveIntensity={0.08}
+            metalness={0.08}
+            roughness={0.42}
+          />
         </mesh>
-        {body.id === "saturn" ? <SaturnRings radius={body.size} /> : null}
+        {body.id === "earth" ? (
+          <mesh>
+            <sphereGeometry args={[body.size * 1.06, 32, 32]} />
+            <meshBasicMaterial color="#7dd3fc" opacity={0.14} transparent />
+          </mesh>
+        ) : null}
+        {body.hasRings ? <PlanetaryRings radius={body.size} /> : null}
         {selected ? <SelectionRing radius={body.size + 0.28} /> : null}
         <BodyLabel body={body} selected={selected} />
       </group>
@@ -188,12 +227,12 @@ function Planet({
   );
 }
 
-function SaturnRings({ radius }: { readonly radius: number }) {
-  const geometry = useMemo(() => new RingGeometry(radius * 1.4, radius * 2.2, 64), [radius]);
+function PlanetaryRings({ radius }: { readonly radius: number }) {
+  const geometry = useMemo(() => new RingGeometry(radius * 1.35, radius * 2.15, 72), [radius]);
 
   return (
-    <mesh geometry={geometry} rotation={[Math.PI / 2.6, 0, 0]}>
-      <meshBasicMaterial color="#d6c4a3" opacity={0.7} side={DoubleSide} transparent />
+    <mesh geometry={geometry} rotation={[Math.PI / 2.55, 0.15, 0]}>
+      <meshBasicMaterial color="#e7d3a8" opacity={0.72} side={DoubleSide} transparent />
     </mesh>
   );
 }
@@ -201,8 +240,8 @@ function SaturnRings({ radius }: { readonly radius: number }) {
 function SelectionRing({ radius }: { readonly radius: number }) {
   return (
     <mesh rotation={[Math.PI / 2, 0, 0]}>
-      <ringGeometry args={[radius, radius + 0.08, 48]} />
-      <meshBasicMaterial color="#f8fafc" opacity={0.9} side={DoubleSide} transparent />
+      <ringGeometry args={[radius, radius + 0.07, 56]} />
+      <meshBasicMaterial color="#f8fafc" opacity={0.92} side={DoubleSide} transparent />
     </mesh>
   );
 }
@@ -211,11 +250,11 @@ function BodyLabel({
   body,
   selected,
 }: {
-  readonly body: CelestialBody;
+  readonly body: CatalogBody;
   readonly selected: boolean;
 }) {
   return (
-    <Html center distanceFactor={28} position={[0, body.size + 0.8, 0]} zIndexRange={[10, 0]}>
+    <Html center distanceFactor={32} position={[0, body.size + 0.85, 0]} zIndexRange={[20, 0]}>
       <div
         className={`whitespace-nowrap rounded-full px-2 py-0.5 font-medium text-[11px] tracking-wide ${
           selected
@@ -227,4 +266,12 @@ function BodyLabel({
       </div>
     </Html>
   );
+}
+
+function hashAngle(id: string): number {
+  let hash = 0;
+  for (const char of id) {
+    hash = (hash * 31 + char.charCodeAt(0)) % 1000;
+  }
+  return (hash / 1000) * Math.PI * 2;
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PRODUCT } from "@/lib/product";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -20,8 +21,12 @@ const mono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "3D Solar System Guide",
-  description: "Explore a 3D solar system with a durable eve agent as your guide.",
+  title: {
+    default: `${PRODUCT.name} — ${PRODUCT.tagline}`,
+    template: `%s — ${PRODUCT.name}`,
+  },
+  description: PRODUCT.description,
+  icons: { icon: "/icon.svg" },
 };
 
 export default function RootLayout({ children }: { readonly children: ReactNode }) {
